@@ -1,6 +1,8 @@
 # ray_launch
 
-single-file ray helper, to "stop fighting ray and instead make ray fight for us"
+single-file [ray](https://www.ray.io/) helper, to "stop fighting ray and instead make ray fight for us"
+
+uses ray for only what it's good at—distributing tasks across nodes—not for what it tries to be good for—enterprisey ml training tools
 
 comment out decorators to debug on head node
 
