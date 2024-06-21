@@ -5,7 +5,7 @@ from functools import wraps
 from itertools import zip_longest
 from time import sleep
 
-ray.init('localhost:6379', runtime_env={"working_dir": os.getcwd()})
+_ray_context = ray.init('localhost:6379', runtime_env={"working_dir": os.getcwd()})
 
 def distribute(f):
     """
@@ -70,3 +70,9 @@ def parallelize(f):
                      for item in pair
                      if item is not None]
     return wrapper
+
+def master_address():
+    """
+    Return the IP address of the master node, (hopefully) where the process with rank 0 is running
+    """
+    return _ray_context.address_info['address'].split(':')[0]
