@@ -18,9 +18,28 @@ def main(args, rank=0, world_size=1):
     
 main("test")
 
+# --------------------
+
+from ray.experimental.tqdm_ray import tqdm
+
 @ray_launch.parallelize
 def process(tasks, a, b):
     print(f"{socket.gethostname()} - {tasks=} {a=} {b=}")
+    for task in tqdm(tasks):
+        pass
 
 process(list(range(10)), a=1, b=2)
+
+# --------------------
+
+import torch
+
+@ray_launch.distribute
+def torch_main(args, rank=0, world_size=1):
+    ray_launch.torch_init_process_group(rank, world_size)
+
+    print('Awaiting all processes...')
+    torch.distributed.barrier()
+
+torch_main({"a":1, "b":2})
 ```
