@@ -76,3 +76,30 @@ def master_address():
     Return the IP address of the master node, (hopefully) where the process with rank 0 is running
     """
     return _ray_context.address_info['address'].split(':')[0]
+
+def node_address():
+    """
+    Return the IP address of the current node   
+    """
+    return _ray_context.address_info['node_ip_address']
+
+def torch_init_process_group(rank, world_size, port=29500):
+    """
+    Initialize torch.distributed process group with one Ray task per GPU
+
+    Intended to be called from a @distribute main() function, passing in the rank and world_size kwargs
+
+    E.g.
+    ```
+    @ray_launch.distribute
+    def main(args, rank=0, world_size=1):
+        ray_launch.torch_init_process_group(rank, world_size)
+    
+    main(...)
+    ```
+    """
+    if rank == 0:
+        assert node_address() == master_address(), "Rank 0 got placed on node other than head node!"
+    import torch
+    torch.distributed.init_process_group('nccl', init_method=f'tcp://{master_address()}:{port}', rank=rank, world_size=world_size)
+    torch.distributed.barrier()
